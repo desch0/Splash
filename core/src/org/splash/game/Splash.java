@@ -25,7 +25,7 @@ public class Splash extends ApplicationAdapter {
 	private OrthographicCamera camera;
 	private Box2DDebugRenderer box2dr;
 
-	private Body player, ground;
+	private Body player, ground, ground2, earthGround;
 
 	@Override
 	public void create () {
@@ -33,36 +33,31 @@ public class Splash extends ApplicationAdapter {
 		windowHeight = Gdx.graphics.getHeight();
 
 		camera = new OrthographicCamera();
-		camera.setToOrtho(false, windowWidth/2, windowHeight/2);
+		camera.setToOrtho(false, windowWidth, windowHeight);
 
-		world = new World(new Vector2(0, -9.5f), false);
+		world = new World(new Vector2(0, -9.807f), false);
 
 		batch = new SpriteBatch();
-		world = new World(new Vector2(0, 0), true);
 		box2dr = new Box2DDebugRenderer();
 
-		player = createBox(10, 20,32, 32, false);
-		ground = createBox(0, 0, 64, 32, true);
+		player = createBox(35, 35,32, 32, false);
+		ground = createBox(-64*10, 0, 64*20, 32, true);
+		ground2 = createBox(0, -1000, 64*20, 32, true);
+		earthGround = createBox(-64*100, -5000, 64*200, 32, true);
 	}
 
 	@Override
 	public void render () {
 		ScreenUtils.clear(0, 0, 0, 0);
-		camera = new OrthographicCamera();
-		camera.translate(0, 0);
+		camera.position.set(new Vector2(player.getPosition().x, player.getPosition().y), 0);
 		camera.update();
-		camera.setToOrtho(false, 100, 100);
-		update(Gdx.graphics.getDeltaTime());
 
-		box2dr.render(world, camera.combined);//.scl(PPM));
+		System.out.println(camera.position.x + " " + camera.position.y +"<- camera [] player ->"+ player.getPosition().x +" " +player.getPosition().y);
+		inputIpdate(Gdx.graphics.getDeltaTime());
+		box2dr.render(world, camera.combined.scl(6));//.scl(PPM));
 
 		//batch.setProjectionMatrix(camera.combined);
-		batch.begin();
-
-		batch.end();
-
 		world.step(1/60f, 6, 2);
-		inputIpdate(Gdx.graphics.getDeltaTime());
 	}
 
 	private void inputIpdate(float delta) {
@@ -75,17 +70,11 @@ public class Splash extends ApplicationAdapter {
 			horizontalForce += 1;
 		}
 		if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-			player.applyForceToCenter(0, 300, false);
+			//player.applyForceToCenter(0, 300, true);
+			player.applyForceToCenter(new Vector2(0, 3000), true);
 		}
 
-		player.setLinearVelocity(horizontalForce*5, player.getLinearVelocity().y);
-	}
-	private void update(float delta) {
-		Vector3 position = camera.position;
-		position.x = player.getPosition().x*PPM;
-		position.y = player.getPosition().y*PPM;
-		camera.position.set(position);
-		camera.update();
+		player.setLinearVelocity(horizontalForce*10, player.getLinearVelocity().y);
 	}
 	@Override
 	public void dispose () {
@@ -97,10 +86,13 @@ public class Splash extends ApplicationAdapter {
 	public Body createBox(int x, int y, int width, int height, boolean isStatic) {
 		Body pBody;
 		BodyDef def = new BodyDef();
-		if(isStatic)
-			def.type = BodyDef.BodyType.DynamicBody;
-		else
+		if(isStatic) {
 			def.type = BodyDef.BodyType.StaticBody;
+		}
+		else {
+			def.type = BodyDef.BodyType.DynamicBody;
+		}
+
 		def.position.set(x/PPM, y/PPM);
 		def.fixedRotation = false;
 		pBody = world.createBody(def);
