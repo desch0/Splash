@@ -26,15 +26,14 @@ public class Splash extends ApplicationAdapter {
 	private OrthographicCamera camera;
 	private Box2DDebugRenderer box2dr;
 
-	private Body player, ground, ground2, earthGround;
+	private Body player, roof, ground, ground2, earthGround;
 
 	@Override
 	public void create () {
 		windowWidth = Gdx.graphics.getWidth();
 		windowHeight = Gdx.graphics.getHeight();
 
-		camera = new OrthographicCamera(210 * (windowWidth/windowHeight), 210);
-		//camera.setToOrtho(false, windowWidth, windowHeight);
+		camera = new OrthographicCamera(10*5 * (windowWidth/windowHeight), 10*5);
 
 		world = new World(new Vector2(0, -9.807f), false);
 
@@ -42,24 +41,24 @@ public class Splash extends ApplicationAdapter {
 		box2dr = new Box2DDebugRenderer();
 
 		player = createBox(35, 35,32, 32, false);
+
 		ground = createBox(-64*10, 0, 64*20, 32, true);
 		ground2 = createBox(0, -1000, 64*20, 32, true);
-		earthGround = createBox(-64*100, -5000, 64*200, 32, true);
+		earthGround = createBox(-64*100, -5000, 64*200, 64, true);
+
 	}
 
 	@Override
 	public void render () {
 		ScreenUtils.clear(0, 0, 0, 0);
 
-		//camera.position.set(new Vector2(player.getPosition().x*WORLD_TO_BOX, player.getPosition().y*WORLD_TO_BOX), 0);
-		camera.position.set(new Vector2(player.getPosition().x*210, player.getPosition().y/210), 0);
+		Vector2 vector = new Vector2(player.getPosition().x, player.getPosition().y);
+		camera.position.set(vector, 0);
 		camera.update();
 
-		//System.out.println(camera.position.x + " " + camera.position.y +"<- camera [] player ->"+ player.getPosition().x +" " +player.getPosition().y);
 		inputIpdate(Gdx.graphics.getDeltaTime());
-		box2dr.render(world, camera.combined.scl(6));//.scl(PPM));
+		box2dr.render(world, camera.combined);
 
-		//batch.setProjectionMatrix(camera.combined);
 		world.step(1/60f, 6, 2);
 	}
 
@@ -67,17 +66,17 @@ public class Splash extends ApplicationAdapter {
 		int horizontalForce = 0;
 		int verticalForce = 0;
 
-		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+		if(Gdx.input.isKeyPressed(Input.Keys.A)) {
 			horizontalForce -= 1;
 		}
-		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+		if(Gdx.input.isKeyPressed(Input.Keys.D)) {
 			horizontalForce += 1;
 		}
-		if(Gdx.input.isKeyPressed(Input.Buttons.FORWARD)) {
+		if(Gdx.input.isKeyPressed(Input.Keys.W)) {
 			verticalForce += 1;
 		}
-		if(Gdx.input.isKeyPressed(Input.Buttons.BACK)) {
-			verticalForce += 1;
+		if(Gdx.input.isKeyPressed(Input.Keys.S)) {
+			verticalForce -= 1;
 		}
 
 		if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
@@ -85,8 +84,8 @@ public class Splash extends ApplicationAdapter {
 			player.applyForceToCenter(new Vector2(0, 3000), true);
 		}
 
-		player.setLinearVelocity(horizontalForce*10, player.getLinearVelocity().y);
-		player.applyForceToCenter(new Vector2(0, verticalForce*5), 0);
+		player.setLinearVelocity(horizontalForce*100, player.getLinearVelocity().y);
+		player.applyForceToCenter(new Vector2(0, verticalForce*5), false);
 	}
 	@Override
 	public void dispose () {
