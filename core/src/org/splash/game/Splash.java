@@ -16,6 +16,7 @@ import static org.splash.game.util.Constants.PPM;
 
 public class Splash extends ApplicationAdapter {
 
+	private final float WORLD_TO_BOX = 32f;
 	private float windowWidth;
 	private float windowHeight;
 	public static final float UNIT_SCALE=1f/16f;
@@ -32,8 +33,8 @@ public class Splash extends ApplicationAdapter {
 		windowWidth = Gdx.graphics.getWidth();
 		windowHeight = Gdx.graphics.getHeight();
 
-		camera = new OrthographicCamera();
-		camera.setToOrtho(false, windowWidth, windowHeight);
+		camera = new OrthographicCamera(210 * (windowWidth/windowHeight), 210);
+		//camera.setToOrtho(false, windowWidth, windowHeight);
 
 		world = new World(new Vector2(0, -9.807f), false);
 
@@ -49,10 +50,12 @@ public class Splash extends ApplicationAdapter {
 	@Override
 	public void render () {
 		ScreenUtils.clear(0, 0, 0, 0);
-		camera.position.set(new Vector2(player.getPosition().x, player.getPosition().y), 0);
+
+		//camera.position.set(new Vector2(player.getPosition().x*WORLD_TO_BOX, player.getPosition().y*WORLD_TO_BOX), 0);
+		camera.position.set(new Vector2(player.getPosition().x*210, player.getPosition().y/210), 0);
 		camera.update();
 
-		System.out.println(camera.position.x + " " + camera.position.y +"<- camera [] player ->"+ player.getPosition().x +" " +player.getPosition().y);
+		//System.out.println(camera.position.x + " " + camera.position.y +"<- camera [] player ->"+ player.getPosition().x +" " +player.getPosition().y);
 		inputIpdate(Gdx.graphics.getDeltaTime());
 		box2dr.render(world, camera.combined.scl(6));//.scl(PPM));
 
@@ -62,6 +65,7 @@ public class Splash extends ApplicationAdapter {
 
 	private void inputIpdate(float delta) {
 		int horizontalForce = 0;
+		int verticalForce = 0;
 
 		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
 			horizontalForce -= 1;
@@ -69,12 +73,20 @@ public class Splash extends ApplicationAdapter {
 		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
 			horizontalForce += 1;
 		}
+		if(Gdx.input.isKeyPressed(Input.Buttons.FORWARD)) {
+			verticalForce += 1;
+		}
+		if(Gdx.input.isKeyPressed(Input.Buttons.BACK)) {
+			verticalForce += 1;
+		}
+
 		if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
 			//player.applyForceToCenter(0, 300, true);
 			player.applyForceToCenter(new Vector2(0, 3000), true);
 		}
 
 		player.setLinearVelocity(horizontalForce*10, player.getLinearVelocity().y);
+		player.applyForceToCenter(new Vector2(0, verticalForce*5), 0);
 	}
 	@Override
 	public void dispose () {
