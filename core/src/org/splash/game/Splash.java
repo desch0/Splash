@@ -84,14 +84,16 @@ public class Splash extends ApplicationAdapter {
 	public void initFont() {
 		fontGenerator = new FreeTypeFontGenerator(Gdx.files.internal("LiberationSans-Bold.ttf"));
 		fontParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-		fontParameter.size = 20;
+		fontParameter.size = 5;
 		fontParameter.color = Color.WHITE;
 		font = fontGenerator.generateFont(fontParameter);
+		font.setUseIntegerPositions(false);
+
 	}
 	public void printDebug() {
 		String info = "Player body x: " + player.getBody().getPosition().x + "; y: "+player.getBody().getPosition().y+";\n";
 		info += card.getBody().getPosition().x+"; "+ card.getBody().getPosition().x*PPM;
-		font.draw(batch, info, windowWidth-400,windowHeight-20);
+		font.draw(batch, info, (0),(0));
 	}
 	@Override
 	public void render () {
@@ -101,11 +103,13 @@ public class Splash extends ApplicationAdapter {
 		camera.position.set(vector, 0);
 		camera.update();
 
+
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
 		batch.draw(cardTexture, card.getBody().getPosition().x - (200/PPM), card.getBody().getPosition().y-(290/PPM), 200/PPM*2, 290/PPM*2);
 		printDebug();
 		batch.end();
+
 
 		inputIpdate(Gdx.graphics.getDeltaTime());
 		box2dr.render(world, camera.combined);

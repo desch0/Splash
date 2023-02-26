@@ -7,25 +7,14 @@ import com.badlogic.gdx.physics.box2d.World;
 
 import static org.splash.game.util.Constants.PPM;
 
-public class WrapBody {
+public class WBody {
     protected Body body;
     protected BodyDef def = new BodyDef();
     PolygonShape shape;
     protected float width, height;
 
-    public WrapBody(float x, float y, float width, float height, World world, BodyDef.BodyType bodyType) {
-        def.type = bodyType;
-        def.position.set(x / PPM, y / PPM);
-        def.fixedRotation = false;
-        body = world.createBody(def);
+    public WBody(World world) {
 
-        shape = new PolygonShape();
-        shape.setAsBox(width / PPM, height / PPM);
-
-        body.createFixture(shape, 1.0f);
-
-        this.width = width;
-        this.height = height;
     }
 
     public void dispose() {
