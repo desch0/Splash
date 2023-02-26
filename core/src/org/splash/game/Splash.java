@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
@@ -17,6 +18,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 
+
+import java.util.ArrayList;
 
 import static org.splash.game.util.Constants.PPM;
 
@@ -36,10 +39,14 @@ public class Splash extends ApplicationAdapter {
 	private OrthographicCamera camera;
 	private Box2DDebugRenderer box2dr;
 
-	private Body player, box, ground, ground2, earthGround;
+	private Sprite cardSprite;
+
+	private ArrayList<DynamicBody> wrapList = new ArrayList<DynamicBody>();
+	private Body player, card, box, ground, ground2, earthGround, leftWall, rightWall;
+
 
 	private SpriteBatch batch;
-	private Texture texture;
+	private Texture texture, cardTexture;
 	StaticBody tryBody;
 	@Override
 	public void create () {
@@ -48,22 +55,28 @@ public class Splash extends ApplicationAdapter {
 
 		initFont();
 
-		camera = new OrthographicCamera(10*5 * (windowWidth/windowHeight), 10*5);
+		camera = new OrthographicCamera(50 * (windowWidth/windowHeight), 50);
+
 
 		batch = new SpriteBatch();
 		texture = new Texture("dove.png");
+		cardTexture = new Texture("ace_of_clubs.png");
 
 		world = new World(new Vector2(0, -10f), false);
 
 		box2dr = new Box2DDebugRenderer();
 
-		player = createBox(35, 35,64, 64, false);
-		box = new DynamicBody(-300, 35, 64*2, 64*2, world);
 
-		ground = new StaticBody(-64*10, 0, 64*20, 32, world);
-		tryBody = new StaticBody(100, 500, 100, 100, world);
-		earthGround = new StaticBody(-1500*64, -5000, 2*1500*64, 100, world);
-		//tryBody = new StaticBody(-64*1500, -100, 64*1500, 100, world);
+		player = new DynamicBody(-400, 0,100, 100, world).getBody();
+		card = new DynamicBody(-100, 1000, 100, 145, world).getBody();
+
+		ground = new StaticBody(-100*10, 0, 100*20, 32, world).getBody();
+		leftWall = new StaticBody(-100*30-30, 10*47, 32, 400, world).getBody();
+		rightWall = new StaticBody(100*10, 10*47, 32, 400, world).getBody();
+		ground2 = new StaticBody(-10000*10, -5000, 10000*20, 32, world).getBody();
+
+		cardSprite = new Sprite(cardTexture);
+		cardSprite.setSize(100/PPM, 145/PPM);
 
 	}
 
@@ -75,7 +88,8 @@ public class Splash extends ApplicationAdapter {
 		font = fontGenerator.generateFont(fontParameter);
 	}
 	public void printDebug() {
-		String info = "Player body x: " + player.getPosition().x + "; y: "+player.getPosition().y+";";
+		String info = "Player body x: " + player.getPosition().x + "; y: "+player.getPosition().y+";\n";
+		info += card.getPosition().x+"; "+ card.getPosition().x*PPM;
 		font.draw(batch, info, windowWidth-400,windowHeight-20);
 	}
 	@Override
@@ -86,10 +100,10 @@ public class Splash extends ApplicationAdapter {
 		camera.position.set(vector, 0);
 		camera.update();
 
+		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
-		batch.draw(texture, player.getPosition().x*PPM, player.getPosition().y*PPM);
+		batch.draw(cardTexture, card.getPosition().x - (100/PPM), card.getPosition().y-(145/PPM), 100/PPM*2, 145/PPM*2);
 		printDebug();
-		//batch.draw(texture, player.getPosition().x*PPM+(texture.getWidth()/2), player.getPosition().y*PPM-(texture.getHeight()/2));
 		batch.end();
 
 		inputIpdate(Gdx.graphics.getDeltaTime());
@@ -121,8 +135,7 @@ public class Splash extends ApplicationAdapter {
 		}
 
 		if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-			//player.applyForceToCenter(0, 300, true);
-			player.applyForceToCenter(new Vector2(0, 300), true);
+			player.applyForceToCenter(0, 3000*16, true);
 		}
 
 		player.setLinearVelocity(horizontalForce*5, player.getLinearVelocity().y);
@@ -136,30 +149,6 @@ public class Splash extends ApplicationAdapter {
 		world.dispose();
 		box2dr.dispose();
 		batch.dispose();
-	}
-
-	public Body createBox(int x, int y, int width, int height, boolean isStatic) {
-		Body pBody;
-		BodyDef def = new BodyDef();
-		if(isStatic) {
-			def.type = BodyDef.BodyType.StaticBody;
-		}
-		else {
-			def.type = BodyDef.BodyType.DynamicBody;
-		}
-
-		def.position.set(x/PPM, y/PPM);
-		def.fixedRotation = false;
-		pBody = world.createBody(def);
-
-		PolygonShape shape = new PolygonShape();
-		shape.setAsBox(width/PPM, height/PPM);
-
-		pBody.createFixture(shape, 1.0f);
-
-		shape.dispose();
-
-		return pBody;
 	}
 
 
