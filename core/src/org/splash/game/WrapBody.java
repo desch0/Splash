@@ -7,14 +7,14 @@ import com.badlogic.gdx.physics.box2d.World;
 
 import static org.splash.game.util.Constants.PPM;
 
-public class StaticBody {
+public class WrapBody {
     private Body body;
     private BodyDef def = new BodyDef();
-    private PolygonShape shape;
+    PolygonShape shape;
     private float width, height;
 
-    public StaticBody(float x, float y, float width, float height, World world) {
-        def.type = BodyDef.BodyType.StaticBody;
+    public WrapBody(float x, float y, float width, float height, World world) {
+        def.type = BodyDef.BodyType.KinematicBody;
         def.position.set(x / PPM, y / PPM);
         def.fixedRotation = false;
         body = world.createBody(def);

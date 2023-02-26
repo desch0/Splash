@@ -11,6 +11,7 @@ public class DynamicBody {
     private Body body;
     private BodyDef def = new BodyDef();
     private PolygonShape shape;
+    private float width, height;
 
     public DynamicBody(float x, float y, float width, float height, World world) {
         def.type = BodyDef.BodyType.DynamicBody;
@@ -27,6 +28,9 @@ public class DynamicBody {
         shape.setAsBox(width / PPM, height / PPM);
 
         body.createFixture(shape, 1.0f);
+
+        this.width = width;
+        this.height = height;
 
     }
 

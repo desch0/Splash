@@ -42,7 +42,8 @@ public class Splash extends ApplicationAdapter {
 	private Sprite cardSprite;
 
 	private ArrayList<DynamicBody> wrapList = new ArrayList<DynamicBody>();
-	private Body player, card, box, ground, ground2, earthGround, leftWall, rightWall;
+	private DynamicBody player, card;
+	private StaticBody  ground, ground2, leftWall, rightWall;
 
 
 	private SpriteBatch batch;
@@ -67,13 +68,13 @@ public class Splash extends ApplicationAdapter {
 		box2dr = new Box2DDebugRenderer();
 
 
-		player = new DynamicBody(-400, 0,100, 100, world).getBody();
-		card = new DynamicBody(-100, 1000, 100, 145, world).getBody();
+		player = new DynamicBody(-400, 0,100, 100, world);
+		card = new DynamicBody(-100, 1000, 200, 290, world);
 
-		ground = new StaticBody(-100*10, 0, 100*20, 32, world).getBody();
-		leftWall = new StaticBody(-100*30-30, 10*47, 32, 400, world).getBody();
-		rightWall = new StaticBody(100*10, 10*47, 32, 400, world).getBody();
-		ground2 = new StaticBody(-10000*10, -5000, 10000*20, 32, world).getBody();
+		ground = new StaticBody(-100*10, 0, 100*20, 32, world);
+		leftWall = new StaticBody(-100*30-30, 10*47, 32, 400, world);
+		rightWall = new StaticBody(100*10, 10*47, 32, 400, world);
+		ground2 = new StaticBody(-10000*10, -5000, 10000*20, 32, world);
 
 		cardSprite = new Sprite(cardTexture);
 		cardSprite.setSize(100/PPM, 145/PPM);
@@ -88,21 +89,21 @@ public class Splash extends ApplicationAdapter {
 		font = fontGenerator.generateFont(fontParameter);
 	}
 	public void printDebug() {
-		String info = "Player body x: " + player.getPosition().x + "; y: "+player.getPosition().y+";\n";
-		info += card.getPosition().x+"; "+ card.getPosition().x*PPM;
+		String info = "Player body x: " + player.getBody().getPosition().x + "; y: "+player.getBody().getPosition().y+";\n";
+		info += card.getBody().getPosition().x+"; "+ card.getBody().getPosition().x*PPM;
 		font.draw(batch, info, windowWidth-400,windowHeight-20);
 	}
 	@Override
 	public void render () {
 		ScreenUtils.clear(0, 0, 0, 0);
 
-		Vector2 vector = new Vector2(player.getPosition().x, player.getPosition().y);
+		Vector2 vector = new Vector2(player.getBody().getPosition().x, player.getBody().getPosition().y);
 		camera.position.set(vector, 0);
 		camera.update();
 
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
-		batch.draw(cardTexture, card.getPosition().x - (100/PPM), card.getPosition().y-(145/PPM), 100/PPM*2, 145/PPM*2);
+		batch.draw(cardTexture, card.getBody().getPosition().x - (200/PPM), card.getBody().getPosition().y-(290/PPM), 200/PPM*2, 290/PPM*2);
 		printDebug();
 		batch.end();
 
@@ -135,11 +136,11 @@ public class Splash extends ApplicationAdapter {
 		}
 
 		if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-			player.applyForceToCenter(0, 3000*16, true);
+			player.getBody().applyForceToCenter(0, 3000*16, true);
 		}
 
-		player.setLinearVelocity(horizontalForce*5, player.getLinearVelocity().y);
-		player.applyForceToCenter(new Vector2(0, verticalForce*5), false);
+		player.getBody().setLinearVelocity(horizontalForce*5, player.getBody().getLinearVelocity().y);
+		player.getBody().applyForceToCenter(new Vector2(0, verticalForce*5), false);
 
 		if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) Gdx.app.exit();
 	}
