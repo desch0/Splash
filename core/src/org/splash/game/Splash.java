@@ -25,7 +25,6 @@ import static org.splash.game.util.Constants.PPM;
 
 public class Splash extends ApplicationAdapter {
 
-
 	private FreeTypeFontGenerator fontGenerator;
 	private FreeTypeFontGenerator.FreeTypeFontParameter fontParameter;
 	BitmapFont font;
@@ -41,7 +40,7 @@ public class Splash extends ApplicationAdapter {
 
 	private Sprite cardSprite;
 
-	private ArrayList<DynamicBody> wrapList = new ArrayList<DynamicBody>();
+	private ArrayList<WrapBody> wrapList = new ArrayList<WrapBody>();
 	private DynamicBody player, card;
 	private StaticBody  ground, ground2, leftWall, rightWall;
 
@@ -69,7 +68,9 @@ public class Splash extends ApplicationAdapter {
 
 
 		player = new DynamicBody(-400, 0,100, 100, world);
-		card = new DynamicBody(-100, 1000, 200, 290, world);
+
+		for(int i=0; i<5; i++)
+			wrapList.add(new DynamicBody(-500*i, 200, 200, 290, world));
 
 		ground = new StaticBody(-100*10, 0, 100*20, 32, world);
 		leftWall = new StaticBody(-100*30-30, 10*47, 32, 400, world);
@@ -92,7 +93,7 @@ public class Splash extends ApplicationAdapter {
 	}
 	public void printDebug() {
 		String info = "Player body x: " + player.getBody().getPosition().x + "; y: "+player.getBody().getPosition().y+";\n";
-		info += card.getBody().getPosition().x+"; "+ card.getBody().getPosition().x*PPM;
+		//info += card.getBody().getPosition().x+"; "+ card.getBody().getPosition().x*PPM;
 		font.draw(batch, info, (0),(0));
 	}
 	@Override
@@ -106,8 +107,14 @@ public class Splash extends ApplicationAdapter {
 
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
-		batch.draw(cardTexture, card.getBody().getPosition().x - (200/PPM), card.getBody().getPosition().y-(290/PPM), 200/PPM*2, 290/PPM*2);
-		printDebug();
+		for(int i=0; i<wrapList.size(); i++) {
+			batch.draw(cardTexture, wrapList.get(i).getBody().getPosition().x - (wrapList.get(i).width/PPM),
+					wrapList.get(i).getBody().getPosition().y-(wrapList.get(i).height/PPM),
+					wrapList.get(i).width/PPM*2, wrapList.get(i).height/PPM*2);
+			//batch.draw(cardTexture, card.getBody().getPosition().x - (card.width/PPM), card.getBody().getPosition().y-(card.height/PPM),
+			//card.width/PPM*2, card.height/PPM*2);
+		}
+		//printDebug();
 		batch.end();
 
 
@@ -115,7 +122,6 @@ public class Splash extends ApplicationAdapter {
 		box2dr.render(world, camera.combined);
 
 		world.step(1/60f, 6, 2);
-
 	}
 
 	private void inputIpdate(float delta) {

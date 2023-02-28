@@ -8,10 +8,10 @@ import com.badlogic.gdx.physics.box2d.World;
 import static org.splash.game.util.Constants.PPM;
 
 public class WrapBody {
-    protected Body body;
-    protected BodyDef def = new BodyDef();
+    private Body body;
+    private BodyDef def = new BodyDef();
     PolygonShape shape;
-    protected float width, height;
+    public float width, height;
 
     public WrapBody(float x, float y, float width, float height, World world, BodyDef.BodyType bodyType) {
         def.type = bodyType;
