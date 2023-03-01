@@ -8,18 +8,15 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
-import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.math.Vector2;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-
-
 import java.util.ArrayList;
+import cards.Hand;
 
 import static org.splash.game.util.Constants.PPM;
 
@@ -41,13 +38,13 @@ public class Splash extends ApplicationAdapter {
 	private Sprite cardSprite;
 
 	private ArrayList<WrapBody> wrapList = new ArrayList<WrapBody>();
-	private DynamicBody player, card;
-	private StaticBody  ground, ground2, leftWall, rightWall;
 
-
+	Hand hand;
+	CardWrap[] cards;
 	private SpriteBatch batch;
 	private Texture texture, cardTexture;
 	StaticBody tryBody;
+
 	@Override
 	public void create () {
 		windowWidth = Gdx.graphics.getWidth();
@@ -57,29 +54,22 @@ public class Splash extends ApplicationAdapter {
 
 		camera = new OrthographicCamera(50 * (windowWidth/windowHeight), 50);
 
-
 		batch = new SpriteBatch();
-		texture = new Texture("dove.png");
-		cardTexture = new Texture("ace_of_clubs.png");
 
 		world = new World(new Vector2(0, -10f), false);
-
 		box2dr = new Box2DDebugRenderer();
 
 
-		player = new DynamicBody(-400, 0,100, 100, world);
+		generateNewHand();
 
-		for(int i=0; i<5; i++)
-			wrapList.add(new DynamicBody(-500*i, 200, 200, 290, world));
+	}
 
-		ground = new StaticBody(-100*10, 0, 100*20, 32, world);
-		leftWall = new StaticBody(-100*30-30, 10*47, 32, 400, world);
-		rightWall = new StaticBody(100*10, 10*47, 32, 400, world);
-		ground2 = new StaticBody(-10000*10, -5000, 10000*20, 32, world);
-
-		cardSprite = new Sprite(cardTexture);
-		cardSprite.setSize(100/PPM, 145/PPM);
-
+	private void generateNewHand() {
+		hand = new Hand(7);
+		cards = new CardWrap[7];
+		for(int i=0; i<cards.length; i++) {
+			cards[i] = new CardWrap(hand.get(i), -1000+350*i,0, world);
+		}
 	}
 
 	public void initFont() {
@@ -89,71 +79,31 @@ public class Splash extends ApplicationAdapter {
 		fontParameter.color = Color.WHITE;
 		font = fontGenerator.generateFont(fontParameter);
 		font.setUseIntegerPositions(false);
-
-	}
-	public void printDebug() {
-		String info = "Player body x: " + player.getBody().getPosition().x + "; y: "+player.getBody().getPosition().y+";\n";
-		//info += card.getBody().getPosition().x+"; "+ card.getBody().getPosition().x*PPM;
-		font.draw(batch, info, (0),(0));
 	}
 	@Override
 	public void render () {
 		ScreenUtils.clear(0, 0, 0, 0);
 
-		Vector2 vector = new Vector2(player.getBody().getPosition().x, player.getBody().getPosition().y);
-		camera.position.set(vector, 0);
+		camera.position.set(new Vector2(cards[3].body.getBody().getPosition().x, cards[3].body.getBody().getPosition().y), 0);
 		camera.update();
-
 
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
-		for(int i=0; i<wrapList.size(); i++) {
-			batch.draw(cardTexture, wrapList.get(i).getBody().getPosition().x - (wrapList.get(i).width/PPM),
-					wrapList.get(i).getBody().getPosition().y-(wrapList.get(i).height/PPM),
-					wrapList.get(i).width/PPM*2, wrapList.get(i).height/PPM*2);
-			//batch.draw(cardTexture, card.getBody().getPosition().x - (card.width/PPM), card.getBody().getPosition().y-(card.height/PPM),
-			//card.width/PPM*2, card.height/PPM*2);
+		for(CardWrap card: cards) {
+			card.render(batch);
 		}
-		//printDebug();
 		batch.end();
 
+		if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+			generateNewHand();
+		}
 
-		inputIpdate(Gdx.graphics.getDeltaTime());
 		box2dr.render(world, camera.combined);
-
 		world.step(1/60f, 6, 2);
 	}
 
-	private void inputIpdate(float delta) {
-		int horizontalForce = 0;
-		int verticalForce = 0;
-		float speed = 1;
 
-		if(Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-			speed *= 5;
-		}
-		if(Gdx.input.isKeyPressed(Input.Keys.A)) {
-			horizontalForce -= speed;
-		}
-		if(Gdx.input.isKeyPressed(Input.Keys.D)) {
-			horizontalForce += speed;
-		}
-		if(Gdx.input.isKeyPressed(Input.Keys.W)) {
-			verticalForce += 1;
-		}
-		if(Gdx.input.isKeyPressed(Input.Keys.S)) {
-			verticalForce -= 1;
-		}
 
-		if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-			player.getBody().applyForceToCenter(0, 3000*16, true);
-		}
-
-		player.getBody().setLinearVelocity(horizontalForce*5, player.getBody().getLinearVelocity().y);
-		player.getBody().applyForceToCenter(new Vector2(0, verticalForce*5), false);
-
-		if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) Gdx.app.exit();
-	}
 	@Override
 	public void dispose () {
 		texture.dispose();
